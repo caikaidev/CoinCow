@@ -1,0 +1,84 @@
+name: Build Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build-check:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+    
+    - name: Create local.properties for build
+      run: |
+        echo "COINGECKO_API_KEY=dummy_key_for_build_check" > local.properties
+    
+    - name: Run lint check
+      run: ./gradlew lintDebug
+    
+    - name: Build debug APK
+      run: ./gradlew assembleDebug
+    
+    - name: Run unit tests
+      run: ./gradlew testDebugUnitTest
+    
+    - name: Upload lint results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lint-results
+        path: app/build/reports/lint-results-debug.html
+        retention-days: 7
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: app/build/reports/tests/testDebugUnitTest/
+        retention-days: 7
+    
+    - name: Build summary
+      if: always()
+      run: |
+        echo "## 🔍 Build Check Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+          echo "- ✅ Debug APK build successful" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 APK Size: $(du -h app/build/outputs/apk/debug/app-debug.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- ❌ Debug APK build failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 Checks Performed" >> $GITHUB_STEP_SUMMARY
+        echo "- Code compilation" >> $GITHUB_STEP_SUMMARY
+        echo "- Lint analysis" >> $GITHUB_STEP_SUMMARY
+        echo "- Unit tests" >> $GITHUB_STEP_SUMMARY
