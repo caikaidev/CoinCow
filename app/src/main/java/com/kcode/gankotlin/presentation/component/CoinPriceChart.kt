@@ -10,17 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.compose.component.shape.shader.fromBrush
-import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
-import com.patrykandpatrick.vico.core.axis.AxisItemPlacer
-import com.patrykandpatrick.vico.core.chart.line.LineChart
-import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.FloatEntry
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.toArgb
 import com.kcode.gankotlin.domain.model.CoinPriceHistory
@@ -180,68 +177,34 @@ private fun PriceLineChart(
 ) {
     val validPrices = priceHistory.getValidPrices()
     
-    // Convert price data to chart entries
-    val chartEntries = remember(validPrices) {
-        validPrices.mapIndexed { index, pricePoint ->
-            FloatEntry(index.toFloat(), pricePoint.price.toFloat())
+    // Build model producer with Y-only series (X will be the index)
+    val yValues = remember(validPrices) { validPrices.map { it.price.toFloat() } }
+    val xValues = remember(yValues) { yValues.indices.map { it.toFloat() } }
+    val modelProducer = remember { com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer() }
+    LaunchedEffect(yValues) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(xValues, yValues)
+            }
         }
     }
-    
-    val chartEntryModelProducer = remember { ChartEntryModelProducer() }
-    
-    LaunchedEffect(chartEntries) {
-        chartEntryModelProducer.setEntries(chartEntries)
-    }
-    
-    if (chartEntries.isNotEmpty()) {
-        ProvideChartStyle(
-            chartStyle = rememberChartStyle()
-        ) {
-            Chart(
-                chart = lineChart(
-                    lines = listOf(
-                        LineChart.LineSpec(
-                            lineColor = InstagramColors.PriceUp.toArgb(),
-                            lineBackgroundShader = DynamicShaders.fromBrush(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        InstagramColors.PriceUp.copy(alpha = 0.3f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ),
-                chartModelProducer = chartEntryModelProducer,
-                startAxis = rememberStartAxis(
-                    itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = 5)
-                ),
-                bottomAxis = rememberBottomAxis(
-                    itemPlacer = AxisItemPlacer.Horizontal.default(spacing = 1)
-                ),
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+
+    if (yValues.isNotEmpty()) {
+        val lineLayer = rememberLineCartesianLayer()
+        val chart = rememberCartesianChart(
+            lineLayer,
+            startAxis = VerticalAxis.rememberStart(),
+            bottomAxis = HorizontalAxis.rememberBottom(),
+        )
+        CartesianChartHost(
+            chart = chart,
+            modelProducer = modelProducer,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
-@Composable
-private fun rememberChartStyle() = com.patrykandpatrick.vico.compose.style.ChartStyle(
-    axis = com.patrykandpatrick.vico.compose.style.ChartStyle.Axis(
-        axisLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        axisGuidelineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-        axisLineColor = MaterialTheme.colorScheme.outline
-    ),
-    columnChart = com.patrykandpatrick.vico.compose.style.ChartStyle.ColumnChart(
-        columns = emptyList()
-    ),
-    lineChart = com.patrykandpatrick.vico.compose.style.ChartStyle.LineChart(
-        lines = emptyList()
-    ),
-    marker = com.patrykandpatrick.vico.compose.style.ChartStyle.Marker(),
-    elevationOverlayColor = Color.Transparent
-)
+// Removed obsolete ChartStyle plumbing. Vico 2.x composes styling via theme and layer specs.
 
 @Composable
 private fun ChartLoadingState() {

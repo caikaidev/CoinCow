@@ -66,6 +66,10 @@ fun MarketCoinListItem(
         label = "price_color_animation"
     )
     
+    // Icon size aligned with text height
+    val iconSize = 24.dp
+    val secondaryStartPadding = iconSize + 8.dp
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -107,7 +111,7 @@ fun MarketCoinListItem(
                             .build(),
                         contentDescription = "${coin.name} logo",
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(iconSize)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
@@ -140,7 +144,7 @@ fun MarketCoinListItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Add spacing to align with text above (icon width + spacer)
-                    Spacer(modifier = Modifier.width(40.dp)) // 32dp icon + 8dp spacer
+                    Spacer(modifier = Modifier.width(secondaryStartPadding))
                     
                     Text(
                         text = coin.symbol.uppercase(),
@@ -166,7 +170,7 @@ fun MarketCoinListItem(
                 formattedMarketCap?.let { marketCap ->
                     Spacer(modifier = Modifier.height(2.dp))
                     Row {
-                        Spacer(modifier = Modifier.width(40.dp)) // Align with text above
+                        Spacer(modifier = Modifier.width(secondaryStartPadding)) // Align with text above
                         Text(
                             text = "Market Cap: $marketCap",
                             style = MaterialTheme.typography.bodySmall,

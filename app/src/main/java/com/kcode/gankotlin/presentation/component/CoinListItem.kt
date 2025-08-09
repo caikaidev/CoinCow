@@ -51,6 +51,10 @@ fun CoinListItem(
         label = "price_color_animation"
     )
     
+    // Icon size aligned with text height
+    val iconSize = 24.dp
+    val secondaryStartPadding = iconSize + 8.dp
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -70,21 +74,6 @@ fun CoinListItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Coin Image
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(coin.image)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "${coin.name} logo",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
             // Coin Info
             Column(
                 modifier = Modifier.weight(1f)
@@ -92,6 +81,21 @@ fun CoinListItem(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Smaller coin icon integrated with the title text
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(coin.image)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "${coin.name} logo",
+                        modifier = Modifier
+                            .size(iconSize)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
                     Text(
                         text = coin.name,
                         style = MaterialTheme.typography.titleMedium,
@@ -109,20 +113,29 @@ fun CoinListItem(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                Text(
-                    text = coin.symbol.uppercase(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Align start with the title after the icon
+                    Spacer(modifier = Modifier.width(secondaryStartPadding))
+                    Text(
+                        text = coin.symbol.uppercase(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
                 
                 // Market Cap (if available)
                 coin.marketCap?.let { marketCap ->
-                    Text(
-                        text = "Market Cap: ${formatCurrency(marketCap.toDouble())}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row {
+                        Spacer(modifier = Modifier.width(secondaryStartPadding))
+                        Text(
+                            text = "Market Cap: ${formatCurrency(marketCap.toDouble())}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             

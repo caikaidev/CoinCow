@@ -202,10 +202,4 @@ private fun CoinWidgetItem(coin: WidgetCoinData) {
     }
 }
 
-/**
- * Widget receiver for handling widget updates
- */
-@AndroidEntryPoint
-class CryptoWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = CryptoWidget()
-}
+// (Receiver moved to dedicated file `CryptoWidgetReceiver.kt`)

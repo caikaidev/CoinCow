@@ -7,8 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +31,6 @@ fun WatchlistScreen(
     viewModel: WatchlistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val pullToRefreshState = rememberPullToRefreshState()
     
     LaunchedEffect(Unit) {
         viewModel.loadWatchlist()
@@ -70,10 +68,10 @@ fun WatchlistScreen(
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(pullToRefreshState.nestedScrollConnection)
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refreshWatchlist() },
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
@@ -101,7 +99,6 @@ fun WatchlistScreen(
                         )
                     }
                 }
-                
                 // Show error snackbar if there's an error but we have cached data
                 uiState.error?.let { error ->
                     if (uiState.watchlistCoins.isNotEmpty()) {
@@ -111,25 +108,8 @@ fun WatchlistScreen(
                     }
                 }
             }
-            
-            PullToRefreshContainer(
-                state = pullToRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
         }
         
-        // Handle pull to refresh
-        LaunchedEffect(pullToRefreshState.isRefreshing) {
-            if (pullToRefreshState.isRefreshing) {
-                viewModel.refreshWatchlist()
-            }
-        }
-        
-        LaunchedEffect(uiState.isRefreshing) {
-            if (!uiState.isRefreshing) {
-                pullToRefreshState.endRefresh()
-            }
-        }
     }
 }
 
