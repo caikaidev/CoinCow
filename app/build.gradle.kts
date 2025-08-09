@@ -29,18 +29,27 @@ android {
             val keyAlias = System.getenv("KEY_ALIAS")
             val keyPassword = System.getenv("KEY_PASSWORD")
             
-            if (keystoreFile != null && keystorePassword != null && keyAlias != null && keyPassword != null) {
-                storeFile = file(keystoreFile)
-                storePassword = keystorePassword
-                this.keyAlias = keyAlias
-                this.keyPassword = keyPassword
-            } else {
-                // Fallback for local development - create a debug keystore
-                val localKeystore = file("debug.keystore")
-                if (!localKeystore.exists()) {
-                    println("Warning: Release keystore not configured. Using debug keystore for local builds.")
+            if (!keystoreFile.isNullOrEmpty() && !keystorePassword.isNullOrEmpty() && 
+                !keyAlias.isNullOrEmpty() && !keyPassword.isNullOrEmpty()) {
+                val keystoreFileObj = file(keystoreFile)
+                if (keystoreFileObj.exists()) {
+                    storeFile = keystoreFileObj
+                    storePassword = keystorePassword
+                    this.keyAlias = keyAlias
+                    this.keyPassword = keyPassword
+                    println("Using release keystore: ${keystoreFileObj.absolutePath}")
+                } else {
+                    println("Warning: Keystore file not found at: ${keystoreFileObj.absolutePath}")
+                    // Use debug keystore as fallback
+                    storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+                    storePassword = "android"
+                    this.keyAlias = "androiddebugkey"
+                    this.keyPassword = "android"
                 }
-                storeFile = localKeystore
+            } else {
+                println("Warning: Release keystore environment variables not set. Using debug keystore.")
+                // Use debug keystore for local development
+                storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
                 storePassword = "android"
                 this.keyAlias = "androiddebugkey"
                 this.keyPassword = "android"
