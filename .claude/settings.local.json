@@ -3,7 +3,9 @@
     "allow": [
       "Bash(./gradlew testDebugUnitTest:*)",
       "Bash(./gradlew:*)",
-      "Bash(./scripts/build_verification.sh:*)"
+      "Bash(./scripts/build_verification.sh:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
