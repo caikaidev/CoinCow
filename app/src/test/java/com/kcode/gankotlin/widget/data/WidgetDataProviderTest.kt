@@ -79,7 +79,7 @@ class WidgetDataProviderTest {
         // Given
         val watchlistIds = listOf("bitcoin", "ethereum", "binancecoin", "cardano", "solana", "polkadot", "chainlink")
         val mockMarketData = watchlistIds.map { id ->
-            createMockCoinMarketData(id, id.capitalize(), id.take(3).uppercase(), 1000.0)
+            createMockCoinMarketData(id, id.replaceFirstChar { it.uppercase() }, id.take(3).uppercase(), 1000.0)
         }
         
         coEvery { userPreferencesRepository.getWatchlist() } returns flowOf(watchlistIds)
