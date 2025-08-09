@@ -29,6 +29,7 @@ import com.kcode.gankotlin.presentation.component.InstagramStyleCard
 import com.kcode.gankotlin.presentation.component.OnboardingScreen
 import com.kcode.gankotlin.presentation.navigation.CryptoNavigation
 import com.kcode.gankotlin.presentation.navigation.Screen
+import com.kcode.gankotlin.presentation.viewmodel.OnboardingViewModel
 import com.kcode.gankotlin.presentation.viewmodel.SettingsViewModel
 import com.kcode.gankotlin.ui.theme.CryptoTrackerTheme
 
@@ -88,11 +89,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CryptoTrackerApp(
     intent: android.content.Intent? = null,
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    onboardingViewModel: OnboardingViewModel = hiltViewModel()
 ) {
-    var showWelcome by remember { mutableStateOf(true) }
     val navController = rememberNavController()
     val currentTheme by settingsViewModel.currentTheme.collectAsStateWithLifecycle()
+    val showWelcome by onboardingViewModel.isFirstLaunch.collectAsStateWithLifecycle()
     
     // Determine dark theme based on preference
     val darkTheme = when (currentTheme) {
@@ -108,7 +110,7 @@ fun CryptoTrackerApp(
     if (showWelcome) {
         // Onboarding Screen
         OnboardingScreen(
-            onComplete = { showWelcome = false },
+            onComplete = { onboardingViewModel.completeOnboarding() },
             modifier = Modifier.fillMaxSize()
         )
     } else {
@@ -117,12 +119,15 @@ fun CryptoTrackerApp(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 BottomNavigationBar(navController = navController)
-            }
+            },
+            contentWindowInsets = WindowInsets(0, 0, 0, 0)
         ) { innerPadding ->
-            CryptoNavigation(
-                navController = navController,
-                startDestination = Screen.Watchlist.route
-            )
+            Box(modifier = Modifier.padding(innerPadding)) {
+                CryptoNavigation(
+                    navController = navController,
+                    startDestination = Screen.Watchlist.route
+                )
+            }
         }
     }
     }

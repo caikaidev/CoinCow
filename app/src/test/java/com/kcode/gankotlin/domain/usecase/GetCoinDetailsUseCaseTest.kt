@@ -117,8 +117,8 @@ class GetCoinDetailsUseCaseTest {
             ),
             marketData = CoinMarketDetails(
                 currentPrice = mapOf("usd" to 45000.0),
-                marketCap = mapOf("usd" to 850000000000L),
-                totalVolume = mapOf("usd" to 25000000000L),
+                marketCap = mapOf("usd" to 850000000000.0),
+                totalVolume = mapOf("usd" to 25000000000.0),
                 high24h = mapOf("usd" to 46000.0),
                 low24h = mapOf("usd" to 44000.0),
                 priceChange24h = 1000.0,

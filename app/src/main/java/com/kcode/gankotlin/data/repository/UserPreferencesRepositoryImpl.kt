@@ -59,4 +59,16 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setRefreshInterval(intervalMinutes: Long) {
         dataStore.setRefreshInterval(intervalMinutes)
     }
+    
+    override fun isFirstLaunch(): Flow<Boolean> {
+        return dataStore.isFirstLaunch()
+    }
+    
+    override suspend fun markFirstLaunchCompleted() {
+        dataStore.markFirstLaunchCompleted()
+    }
+    
+    override suspend fun resetFirstLaunchStatus() {
+        dataStore.resetFirstLaunchStatus()
+    }
 }

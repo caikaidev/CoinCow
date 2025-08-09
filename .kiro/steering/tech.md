@@ -1,97 +1,91 @@
-# Technology Stack
+---
+inclusion: always
+---
 
-## Build System & Configuration
+# Technology Stack & Development Guidelines
 
-- **Build System**: Gradle with Kotlin DSL (`.gradle.kts`)
-- **Android Gradle Plugin**: 8.11.1
-- **Kotlin**: 2.0.21
-- **Target SDK**: 34 (Android 14)
-- **Min SDK**: 26 (Android 8.0)
-- **Java Version**: 11
+## Core Architecture Principles
 
-## Core Technologies
+- **Clean Architecture**: Strict separation of Domain/Data/Presentation layers
+- **MVVM Pattern**: ViewModels expose StateFlow/SharedFlow, never direct repository access
+- **Dependency Injection**: Use Hilt for all dependencies, avoid manual instantiation
+- **Single Responsibility**: Each class should have one clear purpose
+- **Immutable State**: Use data classes and sealed classes for state management
 
-### UI Framework
+## Technology Stack
 
-- **Jetpack Compose**: Modern declarative UI toolkit
-- **Material 3**: Latest Material Design components
-- **Compose BOM**: 2024.02.00 for version alignment
-- **Navigation Compose**: Type-safe navigation
+### Build & Configuration
 
-### Architecture & DI
+- **Gradle**: Kotlin DSL only (`.gradle.kts`), version catalog in `gradle/libs.versions.toml`
+- **Android**: Target SDK 34, Min SDK 26, AGP 8.11.1
+- **Kotlin**: 2.0.21 with coroutines for all async operations
+- **API Keys**: Store in `local.properties` as `COINGECKO_API_KEY`
 
-- **Hilt**: Dependency injection framework
-- **MVVM Pattern**: ViewModel + StateFlow/SharedFlow
-- **Clean Architecture**: Domain/Data/Presentation layers
-- **Repository Pattern**: Data abstraction layer
+### UI & Navigation
 
-### Networking & Data
+- **Jetpack Compose**: All UI components, no XML layouts
+- **Material 3**: Use theme colors and components consistently
+- **Navigation Compose**: Type-safe navigation with sealed class routes
+- **Instagram-style Design**: Card-based layouts with gradient elements
 
-- **Retrofit**: HTTP client with Moshi converter
-- **OkHttp**: HTTP client with logging and interceptors
-- **Moshi**: JSON serialization with Kotlin support
-- **Room**: Local database with coroutines support
-- **DataStore**: Preferences storage
+### Data & Networking
 
-### Async & State Management
+- **Retrofit + Moshi**: API calls with proper error handling
+- **Room**: Local caching with coroutines, entities mirror DTOs
+- **DataStore**: User preferences, no SharedPreferences
+- **Coil**: Image loading with proper placeholder handling
 
-- **Kotlin Coroutines**: Async programming
-- **StateFlow/SharedFlow**: Reactive state management
-- **WorkManager**: Background task scheduling
+### State Management Rules
 
-### Charts & Visualization
+- **StateFlow**: UI state that persists across configuration changes
+- **SharedFlow**: One-time events (navigation, snackbars, toasts)
+- **Sealed Classes**: Represent loading/success/error states consistently
+- **No LiveData**: Use StateFlow/SharedFlow exclusively
 
-- **Vico**: Modern charting library for Compose
-- **Coil**: Image loading for Compose
+## Code Style Guidelines
 
-### Widgets & Background
+### Naming Conventions
 
-- **Glance**: Jetpack Compose for App Widgets
-- **WorkManager**: Periodic data updates
+- **Files**: `CoinDetailsScreen.kt`, `CryptoRepositoryImpl.kt`
+- **Classes**: PascalCase, descriptive names
+- **Functions**: camelCase, verb-based for actions
+- **Constants**: SCREAMING_SNAKE_CASE in companion objects
+- **Packages**: lowercase, no underscores
 
-## Common Commands
+### Compose Best Practices
 
-### Build & Run
+- **Stateless Composables**: Pass state and callbacks as parameters
+- **Preview Functions**: Include `@Preview` for all major components
+- **Modifier Parameter**: Always include `modifier: Modifier = Modifier`
+- **State Hoisting**: Lift state to appropriate level, prefer ViewModel
 
-```bash
-# Clean build
-./gradlew clean
+### Error Handling
 
-# Build debug APK
-./gradlew assembleDebug
+- **NetworkResult**: Wrap API responses in sealed class
+- **Try-Catch**: Use in repositories, not ViewModels
+- **User-Friendly Messages**: Convert technical errors to readable text
+- **Offline Support**: Always check cache before network calls
 
-# Install debug build
-./gradlew installDebug
-
-# Run tests
-./gradlew test
-
-# Run instrumented tests
-./gradlew connectedAndroidTest
-```
-
-### Development
+## Development Commands
 
 ```bash
-# Check dependencies
-./gradlew dependencies
-
-# Lint check
-./gradlew lint
-
-# Generate build reports
-./gradlew build --scan
+# Essential commands for this project
+./gradlew clean assembleDebug    # Clean build
+./gradlew installDebug          # Install on device
+./gradlew test                  # Run unit tests
+./gradlew lint                  # Code quality check
 ```
 
-## API Configuration
+## API Integration Rules
 
-- **CoinGecko API**: Primary data source
-- **API Key**: Configured via `local.properties` as `COINGECKO_API_KEY`
-- **Rate Limiting**: Custom interceptor for API throttling
-- **Caching Strategy**: 1-minute cache for market data, 5-minute for details
+- **CoinGecko API**: Primary data source, respect rate limits
+- **Caching Strategy**: 1-minute for market data, 5-minutes for coin details
+- **Error Handling**: Graceful degradation when API unavailable
+- **Background Updates**: Use WorkManager for periodic data refresh
 
-## Testing Strategy
+## Testing Requirements
 
-- **Unit Tests**: JUnit + Coroutines Test
-- **Integration Tests**: Hilt Testing
-- **UI Tests**: Compose Testing with Espresso
+- **Unit Tests**: All ViewModels, UseCases, and Repositories
+- **Compose Tests**: Critical user flows and component behavior
+- **Mocking**: Use MockK for Kotlin-friendly mocking
+- **Coroutines**: Use TestCoroutineDispatcher for async testing

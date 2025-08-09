@@ -11,7 +11,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kcode.gankotlin"
+        applicationId = "com.kcode.coincow"
         minSdk = 26
         targetSdk = 34
         versionCode = getVersionCode()
@@ -129,11 +129,11 @@ android {
         disable += setOf("MissingTranslation", "ExtraTranslation")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true

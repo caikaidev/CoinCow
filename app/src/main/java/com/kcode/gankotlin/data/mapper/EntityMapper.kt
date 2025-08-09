@@ -125,8 +125,8 @@ fun CoinDetailsEntity.toDomainModel(moshi: Moshi): CoinDetails {
         ),
         marketData = CoinMarketDetails(
             currentPrice = mapOf("usd" to (currentPriceUsd ?: 0.0)),
-            marketCap = mapOf("usd" to (marketCapUsd ?: 0L)),
-            totalVolume = mapOf("usd" to (totalVolumeUsd ?: 0L)),
+            marketCap = mapOf("usd" to (marketCapUsd ?: 0.0)),
+            totalVolume = mapOf("usd" to (totalVolumeUsd ?: 0.0)),
             high24h = mapOf("usd" to (high24hUsd ?: 0.0)),
             low24h = mapOf("usd" to (low24hUsd ?: 0.0)),
             priceChange24h = priceChange24h,

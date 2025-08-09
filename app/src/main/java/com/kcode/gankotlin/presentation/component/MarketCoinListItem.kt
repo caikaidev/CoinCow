@@ -153,18 +153,12 @@ fun MarketCoinListItem(
                     
                     // Price Change
                     coin.priceChangePercentage24h?.let { changePercentage ->
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = animatedColor.copy(alpha = 0.1f)
-                        ) {
-                            Text(
-                                text = coin.getFormattedPriceChangePercentage(),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = animatedColor,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
+                        Text(
+                            text = coin.getFormattedPriceChangePercentage(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = animatedColor,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
                 

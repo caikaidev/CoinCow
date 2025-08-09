@@ -19,13 +19,13 @@ data class CoinMarketDataDto(
     @Json(name = "current_price")
     val currentPrice: Double,
     @Json(name = "market_cap")
-    val marketCap: Long?,
+    val marketCap: Double?,
     @Json(name = "market_cap_rank")
     val marketCapRank: Int?,
     @Json(name = "fully_diluted_valuation")
-    val fullyDilutedValuation: Long?,
+    val fullyDilutedValuation: Double?,
     @Json(name = "total_volume")
-    val totalVolume: Long?,
+    val totalVolume: Double?,
     @Json(name = "high_24h")
     val high24h: Double?,
     @Json(name = "low_24h")

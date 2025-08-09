@@ -146,7 +146,8 @@ private fun CoinDetailTopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        windowInsets = TopAppBarDefaults.windowInsets
     )
 }
 
@@ -353,8 +354,8 @@ private fun CoinPriceInfo(
 private fun CoinMarketDataSection(
     coinDetails: com.kcode.gankotlin.domain.model.CoinDetails
 ) {
-    val marketCap = coinDetails.marketData.marketCap["usd"] ?: 0L
-    val totalVolume = coinDetails.marketData.totalVolume["usd"] ?: 0L
+    val marketCap = coinDetails.marketData.marketCap["usd"] ?: 0.0
+    val totalVolume = coinDetails.marketData.totalVolume["usd"] ?: 0.0
     val circulatingSupply = coinDetails.marketData.circulatingSupply
     val maxSupply = coinDetails.marketData.maxSupply
     
@@ -391,7 +392,7 @@ private fun CoinMarketDataSection(
             circulatingSupply?.let { supply ->
                 MarketDataItem(
                     label = "Circulating Supply",
-                    value = "${formatLargeNumber(supply.toLong())} ${coinDetails.symbol.uppercase()}"
+                    value = "${formatLargeNumber(supply)} ${coinDetails.symbol.uppercase()}"
                 )
             }
             
@@ -399,7 +400,7 @@ private fun CoinMarketDataSection(
             maxSupply?.let { supply ->
                 MarketDataItem(
                     label = "Max Supply",
-                    value = "${formatLargeNumber(supply.toLong())} ${coinDetails.symbol.uppercase()}"
+                    value = "${formatLargeNumber(supply)} ${coinDetails.symbol.uppercase()}"
                 )
             }
         }
@@ -463,12 +464,12 @@ private fun CoinDescriptionSection(
     }
 }
 
-private fun formatLargeNumber(number: Long): String {
+private fun formatLargeNumber(number: Double): String {
     return when {
         number >= 1_000_000_000_000 -> String.format("%.2fT", number / 1_000_000_000_000.0)
         number >= 1_000_000_000 -> String.format("%.2fB", number / 1_000_000_000.0)
         number >= 1_000_000 -> String.format("%.2fM", number / 1_000_000.0)
         number >= 1_000 -> String.format("%.2fK", number / 1_000.0)
-        else -> number.toString()
+        else -> String.format("%.0f", number)
     }
 }

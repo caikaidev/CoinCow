@@ -65,19 +65,12 @@ fun CryptoNavigation(
             SearchScreen(
                 onCoinClick = { coinId ->
                     navController.navigate(Screen.CoinDetail.createRoute(coinId))
-                },
-                onBackClick = {
-                    navController.popBackStack()
                 }
             )
         }
         
         composable(Screen.Settings.route) {
-            SettingsScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SettingsScreen()
         }
         
         composable(Screen.CoinDetail.route) { backStackEntry ->

@@ -49,15 +49,14 @@ fun BottomNavigationBar(
                 },
                 selected = currentRoute == item.route,
                 onClick = {
+                    println("BottomNav clicked: ${item.label} -> ${item.route}, current: $currentRoute")
                     if (currentRoute != item.route) {
                         navController.navigate(item.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            popUpTo(navController.graph.startDestinationId) {
+                            // Pop up to the start destination to avoid building up a large stack
+                            popUpTo(Screen.Watchlist.route) {
                                 saveState = true
                             }
-                            // Avoid multiple copies of the same destination when
-                            // reselecting the same item
+                            // Avoid multiple copies of the same destination
                             launchSingleTop = true
                             // Restore state when reselecting a previously selected item
                             restoreState = true

@@ -48,9 +48,9 @@ data class CoinMarketDetailsDto(
     @Json(name = "current_price")
     val currentPrice: Map<String, Double>,
     @Json(name = "market_cap")
-    val marketCap: Map<String, Long>,
+    val marketCap: Map<String, Double>,
     @Json(name = "total_volume")
-    val totalVolume: Map<String, Long>,
+    val totalVolume: Map<String, Double>,
     @Json(name = "high_24h")
     val high24h: Map<String, Double>,
     @Json(name = "low_24h")

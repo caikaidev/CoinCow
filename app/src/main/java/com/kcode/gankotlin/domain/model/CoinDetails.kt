@@ -24,8 +24,8 @@ data class CoinImage(
 
 data class CoinMarketDetails(
     val currentPrice: Map<String, Double>,
-    val marketCap: Map<String, Long>,
-    val totalVolume: Map<String, Long>,
+    val marketCap: Map<String, Double>,
+    val totalVolume: Map<String, Double>,
     val high24h: Map<String, Double>,
     val low24h: Map<String, Double>,
     val priceChange24h: Double?,

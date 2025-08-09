@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -144,26 +143,15 @@ fun CoinListItem(
                 
                 // Price Change
                 coin.priceChangePercentage24h?.let { changePercentage ->
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = animatedColor.copy(alpha = 0.1f)
-                    ) {
-                        Text(
-                            text = coin.getFormattedPriceChangePercentage(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = animatedColor,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
+                    Text(
+                        text = coin.getFormattedPriceChangePercentage(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = animatedColor,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 
-                // Mini Chart Placeholder (for future implementation)
-                Spacer(modifier = Modifier.height(4.dp))
-                MiniChart(
-                    isPositive = coin.isPriceUp(),
-                    modifier = Modifier.size(width = 60.dp, height = 20.dp)
-                )
+
             }
             
             // Remove button (if provided)
@@ -215,33 +203,7 @@ fun CoinListItem(
     }
 }
 
-@Composable
-private fun MiniChart(
-    isPositive: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val color = if (isPositive) InstagramColors.PriceUp else InstagramColors.PriceDown
-    
-    Box(
-        modifier = modifier
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        color.copy(alpha = 0.3f),
-                        color.copy(alpha = 0.1f)
-                    )
-                ),
-                shape = RoundedCornerShape(4.dp)
-            )
-    ) {
-        // Placeholder for mini chart - will be implemented with Vico later
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(2.dp)
-        )
-    }
-}
+
 
 private fun formatPrice(price: Double): String {
     val formatter = NumberFormat.getCurrencyInstance(Locale.US)

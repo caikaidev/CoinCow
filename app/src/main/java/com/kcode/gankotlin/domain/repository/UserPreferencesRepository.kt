@@ -61,4 +61,19 @@ interface UserPreferencesRepository {
      * Set refresh interval preference
      */
     suspend fun setRefreshInterval(intervalMinutes: Long)
+    
+    /**
+     * Check if this is the first app launch
+     */
+    fun isFirstLaunch(): Flow<Boolean>
+    
+    /**
+     * Mark first launch as completed
+     */
+    suspend fun markFirstLaunchCompleted()
+    
+    /**
+     * Reset first launch status (for testing)
+     */
+    suspend fun resetFirstLaunchStatus()
 }
