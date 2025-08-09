@@ -198,7 +198,6 @@ class WidgetDataProviderTest {
             atl = price * 0.1,
             atlChangePercentage = 900.0,
             atlDate = "2013-07-06T00:00:00.000Z",
-            roi = null,
             lastUpdated = "2024-01-01T00:00:00.000Z"
         )
     }

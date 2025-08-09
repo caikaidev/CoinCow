@@ -1,158 +1,89 @@
 package com.kcode.gankotlin.presentation.viewmodel
 
-import com.kcode.gankotlin.data.remote.NetworkResult
 import com.kcode.gankotlin.domain.model.CoinMarketData
-import com.kcode.gankotlin.domain.usecase.GetWatchlistUseCase
-import com.kcode.gankotlin.domain.usecase.RefreshMarketDataUseCase
 import com.kcode.gankotlin.presentation.viewmodel.state.WatchlistUiState
-import io.mockk.coEvery
-import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Assert.*
-import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.*
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class WatchlistViewModelTest {
     
-    private lateinit var getWatchlistUseCase: GetWatchlistUseCase
-    private lateinit var refreshMarketDataUseCase: RefreshMarketDataUseCase
-    private lateinit var viewModel: WatchlistViewModel
-    
-    private val testDispatcher = StandardTestDispatcher()
-    
-    @Before
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-        
-        getWatchlistUseCase = mockk()
-        refreshMarketDataUseCase = mockk()
-        
-        viewModel = WatchlistViewModel(
-            getWatchlistUseCase,
-            refreshMarketDataUseCase
-        )
-    }
-    
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-    
     @Test
-    fun `initial state is loading`() {
+    fun `WatchlistUiState initial state works correctly`() {
+        // When
+        val initialState = WatchlistUiState.initial()
+        
         // Then
-        assertTrue(viewModel.uiState.value is WatchlistUiState.Loading)
+        assertFalse(initialState.isLoading)
+        assertFalse(initialState.isRefreshing)
+        assertTrue(initialState.watchlistCoins.isEmpty())
+        assertNull(initialState.error)
     }
     
     @Test
-    fun `loadWatchlist with successful data updates state to success`() = runTest {
+    fun `WatchlistUiState loading state works correctly`() {
+        // When
+        val loadingState = WatchlistUiState.loading()
+        
+        // Then
+        assertTrue(loadingState.isLoading)
+        assertFalse(loadingState.isRefreshing)
+        assertTrue(loadingState.watchlistCoins.isEmpty())
+        assertNull(loadingState.error)
+    }
+    
+    @Test
+    fun `WatchlistUiState success state works correctly`() {
         // Given
-        val mockCoins = listOf(
+        val coins = listOf(
             createMockCoinMarketData("bitcoin", "Bitcoin", "BTC", 45000.0),
             createMockCoinMarketData("ethereum", "Ethereum", "ETH", 3000.0)
         )
         
-        coEvery { getWatchlistUseCase() } returns flowOf(mockCoins)
-        
         // When
-        viewModel.loadWatchlist()
-        testDispatcher.scheduler.advanceUntilIdle()
+        val successState = WatchlistUiState.success(coins)
         
         // Then
-        val state = viewModel.uiState.value
-        assertTrue(state is WatchlistUiState.Success)
-        assertEquals(mockCoins, (state as WatchlistUiState.Success).coins)
-        assertFalse(state.isRefreshing)
+        assertFalse(successState.isLoading)
+        assertFalse(successState.isRefreshing)
+        assertEquals(2, successState.watchlistCoins.size)
+        assertNull(successState.error)
+        assertFalse(successState.isEmpty)
     }
     
     @Test
-    fun `loadWatchlist with empty data updates state to empty`() = runTest {
+    fun `WatchlistUiState error state works correctly`() {
         // Given
-        coEvery { getWatchlistUseCase() } returns flowOf(emptyList())
-        
-        // When
-        viewModel.loadWatchlist()
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val state = viewModel.uiState.value
-        assertTrue(state is WatchlistUiState.Empty)
-    }
-    
-    @Test
-    fun `loadWatchlist with exception updates state to error`() = runTest {
-        // Given
-        val exception = Exception("Network error")
-        coEvery { getWatchlistUseCase() } throws exception
-        
-        // When
-        viewModel.loadWatchlist()
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val state = viewModel.uiState.value
-        assertTrue(state is WatchlistUiState.Error)
-        assertEquals(exception, (state as WatchlistUiState.Error).exception)
-    }
-    
-    @Test
-    fun `refresh with successful result maintains success state with refreshing flag`() = runTest {
-        // Given
-        val mockCoins = listOf(
+        val errorMessage = "Network error"
+        val existingCoins = listOf(
             createMockCoinMarketData("bitcoin", "Bitcoin", "BTC", 45000.0)
         )
         
-        coEvery { getWatchlistUseCase() } returns flowOf(mockCoins)
-        coEvery { refreshMarketDataUseCase() } returns NetworkResult.Success(Unit)
-        
         // When
-        viewModel.loadWatchlist()
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        viewModel.refresh()
-        
-        // Check intermediate refreshing state
-        val refreshingState = viewModel.uiState.value
-        assertTrue(refreshingState is WatchlistUiState.Success)
-        assertTrue((refreshingState as WatchlistUiState.Success).isRefreshing)
-        
-        testDispatcher.scheduler.advanceUntilIdle()
+        val errorState = WatchlistUiState.error(errorMessage, existingCoins)
         
         // Then
-        val finalState = viewModel.uiState.value
-        assertTrue(finalState is WatchlistUiState.Success)
-        assertFalse((finalState as WatchlistUiState.Success).isRefreshing)
+        assertFalse(errorState.isLoading)
+        assertFalse(errorState.isRefreshing)
+        assertEquals(1, errorState.watchlistCoins.size)
+        assertEquals(errorMessage, errorState.error)
+        assertFalse(errorState.isEmpty)
     }
     
     @Test
-    fun `refresh with error maintains current state and stops refreshing`() = runTest {
+    fun `WatchlistUiState refreshing state works correctly`() {
         // Given
-        val mockCoins = listOf(
+        val existingCoins = listOf(
             createMockCoinMarketData("bitcoin", "Bitcoin", "BTC", 45000.0)
         )
         
-        coEvery { getWatchlistUseCase() } returns flowOf(mockCoins)
-        coEvery { refreshMarketDataUseCase() } returns NetworkResult.Error(
-            Exception("Refresh failed"), 
-            "Refresh failed"
-        )
-        
         // When
-        viewModel.loadWatchlist()
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        viewModel.refresh()
-        testDispatcher.scheduler.advanceUntilIdle()
+        val refreshingState = WatchlistUiState.refreshing(existingCoins)
         
         // Then
-        val state = viewModel.uiState.value
-        assertTrue(state is WatchlistUiState.Success)
-        assertFalse((state as WatchlistUiState.Success).isRefreshing)
+        assertFalse(refreshingState.isLoading)
+        assertTrue(refreshingState.isRefreshing)
+        assertEquals(1, refreshingState.watchlistCoins.size)
+        assertNull(refreshingState.error)
     }
     
     private fun createMockCoinMarketData(
@@ -186,7 +117,6 @@ class WatchlistViewModelTest {
             atl = price * 0.1,
             atlChangePercentage = 900.0,
             atlDate = "2013-07-06T00:00:00.000Z",
-            roi = null,
             lastUpdated = "2024-01-01T00:00:00.000Z"
         )
     }

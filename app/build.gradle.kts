@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -24,13 +26,32 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = System.getenv("KEYSTORE_FILE")
-            val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
-            val keyAlias = System.getenv("KEY_ALIAS")
-            val keyPassword = System.getenv("KEY_PASSWORD")
-            
-            if (!keystoreFile.isNullOrEmpty() && !keystorePassword.isNullOrEmpty() && 
-                !keyAlias.isNullOrEmpty() && !keyPassword.isNullOrEmpty()) {
+            // Prefer environment variables; then Gradle properties (-P / gradle.properties);
+            // finally fall back to local.properties (not in VCS).
+            val localProps = Properties()
+            val localPropsFile = rootProject.file("local.properties")
+            if (localPropsFile.exists()) {
+                localPropsFile.inputStream().use { input ->
+                    localProps.load(input)
+                }
+            }
+            fun readSecret(name: String): String? {
+                val fromEnv: String? = System.getenv(name)
+                if (!fromEnv.isNullOrEmpty()) return fromEnv
+                val fromGradleProp: String? = project.findProperty(name) as String?
+                if (!fromGradleProp.isNullOrEmpty()) return fromGradleProp
+                val fromLocal: String? = localProps.getProperty(name)
+                return if (!fromLocal.isNullOrEmpty()) fromLocal else null
+            }
+
+            val keystoreFile = readSecret("KEYSTORE_FILE")
+            val keystorePassword = readSecret("KEYSTORE_PASSWORD")
+            val keyAlias = readSecret("KEY_ALIAS")
+            val keyPassword = readSecret("KEY_PASSWORD")
+
+            if (!keystoreFile.isNullOrEmpty() && !keystorePassword.isNullOrEmpty() &&
+                !keyAlias.isNullOrEmpty() && !keyPassword.isNullOrEmpty()
+            ) {
                 val keystoreFileObj = file(keystoreFile)
                 if (keystoreFileObj.exists()) {
                     storeFile = keystoreFileObj
@@ -47,7 +68,7 @@ android {
                     this.keyPassword = "android"
                 }
             } else {
-                println("Warning: Release keystore environment variables not set. Using debug keystore.")
+                println("Warning: Release keystore secrets not set. Using debug keystore.")
                 // Use debug keystore for local development
                 storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
                 storePassword = "android"
@@ -215,9 +236,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.hilt.android.testing)
+        testImplementation(libs.junit)
+        testImplementation(libs.kotlinx.coroutines.test)
+        testImplementation(libs.mockk)
+        testImplementation(libs.mockito.core)
+        testImplementation(libs.mockito.kotlin)
+        testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.compiler)
     
     androidTestImplementation(libs.androidx.junit)

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew testDebugUnitTest:*)",
+      "Bash(./gradlew:*)",
+      "Bash(./scripts/build_verification.sh:*)"
+    ],
+    "deny": []
+  }
+}
